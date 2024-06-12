@@ -1,0 +1,51 @@
+:root{
+    --primary-color: #3498db; /* Change this to your preferred primary color */
+  --accent: #ff2e54; /* Change this to your preferred secondary color */
+  --white: #ffffff; /* Change this to your preferred white color */
+  --grey: #f1f1f1;
+  --black: #000000; /* Change this to your preferred black color */
+  --black-1: #616161;
+}
+.SignUpPage {
+    background: var(--accent);
+    background-image: url("/images/bg.png");
+    background-size: cover;
+    height: 100vh;
+  }
+  .SignUpPage h2 {
+    color: white;
+    margin-left: 1.5rem;
+  }
+  .HouseImg {
+    margin-bottom: -70px;
+    z-index: 0;
+  }
+  .Header {
+    max-height: 10vh;
+    padding-top: 5vh;
+  }
+  .SignUpForm {
+    background: white;
+    z-index: 100;
+    border-radius: 20px 20px;
+    padding: 2rem;
+    padding-top: 2rem;
+    max-height: fit-content;
+    position: relative;
+    max-height: 80vh;
+    overflow-y: scroll;
+  }
+  
+  .ErrorText {
+    color: red;
+  }
+  
+  .TransparentPage {
+    background: transparent;
+    box-shadow: none;
+    padding-bottom: 0;
+    min-height: 100vh;
+    max-height: 100vh;
+    overflow: hidden;
+  }
+  

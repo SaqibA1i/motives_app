@@ -1,10 +1,9 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FriendRow from "@/components/FriendRow";
 import { useEffect, useState } from "react";
-import { TextInput } from "react-native-gesture-handler";
 import { User } from "@/components/types";
 import fetchFriends from "@/components/api/fetchFriends";
 import Card from "@/components/ui/Card";
@@ -13,6 +12,7 @@ import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import FriendHighlight from "@/components/FriendRow/FriendHighlight";
 import acceptReq from "@/components/api/acceptReq";
+import { getValueFor } from "@/components/helpers/storage";
 
 export default function HomeScreen() {
   const { user } = useUser();
@@ -47,13 +47,17 @@ export default function HomeScreen() {
   }, [search]);
   // get freind requests
   useEffect(() => {
-    axios
-      .get(REACT_APP_API_URL + "/api/requests", {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setRequests(res.data);
-      });
+    getValueFor().then((tokens) => {
+      axios
+        .get(REACT_APP_API_URL + "/api/requests", {
+          data: {
+            idToken: tokens,
+          },
+        })
+        .then((res) => {
+          setRequests(res.data);
+        });
+    });
   }, []);
   const accept = (id: string) => {
     acceptReq(id).then((res) => {
@@ -92,7 +96,6 @@ export default function HomeScreen() {
           autoCorrect={false}
           autoCapitalize="none"
         />
-        <hr />
         {loading && (
           <Text style={{ textAlign: "center", marginVertical: 20 }}>
             Loading...
@@ -114,6 +117,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 20,
     backgroundColor: "white",
+    height: "100%",
   },
   containerBody: {
     backgroundColor: "#F4F2FF",

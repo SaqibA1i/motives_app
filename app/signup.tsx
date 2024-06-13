@@ -11,7 +11,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { REACT_APP_API_URL } from "@env";

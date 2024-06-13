@@ -230,11 +230,11 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     color: "gray",
+    fontSize: 15,
   },
   signup: {
     cursor: "pointer",
     textDecorationLine: "underline",
     color: "#8C77DA",
-    fontSize: 13,
   },
 });

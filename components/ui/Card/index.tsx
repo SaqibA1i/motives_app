@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, StyleSheet, Text, View } from "react-native";
 import FriendHighlight from "../../FriendRow/FriendHighlight";
 import { Friend } from "../../types";
@@ -6,26 +6,33 @@ import addFriend from "../../api/addFriend";
 import acceptReq from "../../api/acceptReq";
 import { useNavigation } from "expo-router";
 
+import { useMutation, useQueryClient } from "react-query";
+
 const Card = ({ user }: { user: Friend }) => {
   const { id, status } = user;
   const navigation = useNavigation();
-
+  const queryClient = useQueryClient();
+  useEffect(() => {
+    queryClient.invalidateQueries("friends");
+  }, []);
+  const mutation = useMutation(addFriend, {
+    onSuccess: (_res) => {
+      queryClient.invalidateQueries("friends");
+      queryClient.invalidateQueries("friends_search");
+    },
+  });
   const sendReq = () => {
-    addFriend(id)
-      .then((res) => {
-        console.log(res);
-        // refresh the page in react native
-        navigation.navigate("explore");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    mutation.mutateAsync(id).catch((err) => {
+      console.log(err);
+    });
   };
   const accept = () => {
     acceptReq(id).then((res) => {
       console.log(res);
       // refresh the page in react native
-      navigation.navigate("explore");
+      queryClient.invalidateQueries("friends");
+      queryClient.invalidateQueries("friends_req");
+      queryClient.invalidateQueries("friends_search");
     });
   };
   return (
@@ -41,7 +48,10 @@ const Card = ({ user }: { user: Friend }) => {
         {status[0] === 3 && <Text style={styles.add2}>✓ Friends</Text>}
 
         {status[0] === 1 && (
-          <Text style={styles.add2}>✉ Request Sent {status[1]}</Text>
+          <>
+            <Text style={styles.add2}>✉ Request Sent</Text>
+            <Text style={styles.add2}>{new Date(status[1]).toUTCString()}</Text>
+          </>
         )}
         {status[0] === 2 && (
           <Text onPress={accept} style={styles.accept}>
@@ -98,11 +108,11 @@ const styles = StyleSheet.create({
   },
   add2: {
     color: "#6FB6E9",
-    fontSize: 12,
-    borderRadius: 20,
+    fontSize: 15,
+    borderRadius: 30,
     paddingHorizontal: 10,
-    paddingVertical: 5,
-    textAlign: "center",
+    paddingVertical: 0,
+    textAlign: "left",
   },
 });
 export default Card;

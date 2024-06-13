@@ -19,7 +19,7 @@ import { useNavigation } from "expo-router";
 import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import getUser from "../components/api/getUser";
-
+import { useQueryClient } from "react-query";
 import { save, getValueFor } from "../components/helpers/storage";
 const logo = require("@/assets/images/bg.png");
 
@@ -28,7 +28,7 @@ export default function LoginForm() {
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const queryClient = useQueryClient();
   const navigation = useNavigation();
 
   const handleSignIn = async () => {
@@ -45,54 +45,11 @@ export default function LoginForm() {
       const idToken = await userCredential.user.getIdToken();
       const refreshToken = userCredential.user.refreshToken;
       await save({ idToken, refreshToken });
-
-      // fetch(REACT_APP_API_URL + "/api/signin", {
-      //   method: "POST",
-      //   headers: {
-      //     "Content-Type": "application/json",
-      //   },
-      //   body: JSON.stringify({ idToken, refreshToken }),
-      //   credentials: "include",
-      // })
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((err) => {
-      //     console.error(err.message);
-      //   });
-
-      // axios
-      //   .get("http://172.24.50.183:3001/api", {})
-      //   .then((res) => {
-      //     console.log(res.data);
-      //   })
-      //   .catch((err) => {
-      //     console.error(err);
-      //   });
-
-      // axios
-      //   .post(
-      //     REACT_APP_API_URL + "/api/signin",
-      //     {
-      //       idToken,
-      //       refreshToken,
-      //     },
-      //     { withCredentials: true }
-      //   )
-      //   .then((res) => {
-      //     console.log(res);
-      //   })
-      //   .catch((err) => {
-      //     console.error(err);
-      // });
-
-      getUser()
-        .then((user) => {
-          // setUser(user as User);
-          navigation.navigate("(tabs)");
-          console.info("User signed in: ", user);
-        })
-        .catch((err) => console.error(JSON.stringify(err)));
+      queryClient.invalidateQueries("user");
+      queryClient.invalidateQueries("friends");
+      queryClient.invalidateQueries("friends_req");
+      queryClient.invalidateQueries("friends_search");
+      navigation.navigate("(tabs)");
     } catch (error) {
       console.log("Error signing in: ", error.message);
       setError(error.message);
@@ -252,11 +209,11 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     color: "gray",
+    fontSize: 15,
   },
   signup: {
     cursor: "pointer",
     textDecorationLine: "underline",
     color: "#8C77DA",
-    fontSize: 13,
   },
 });

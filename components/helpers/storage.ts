@@ -21,3 +21,7 @@ export async function getValueFor() {
     console.log("No values stored under that key.");
   }
 }
+
+export function clear() {
+  return SecureStore.deleteItemAsync("idToken");
+}

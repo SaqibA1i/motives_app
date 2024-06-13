@@ -10,6 +10,7 @@ export default function HomeScreen() {
   const { user } = useUser();
   const [show, setShow] = useState(false);
 
+  console.log("USER HOME PAGE", user);
   if (!user) {
     return null;
   }

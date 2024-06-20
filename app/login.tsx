@@ -24,7 +24,6 @@ import { save, getValueFor } from "../components/helpers/storage";
 const logo = require("@/assets/images/bg.png");
 
 export default function LoginForm() {
-  const [click, setClick] = useState(false);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -44,12 +43,13 @@ export default function LoginForm() {
       );
       const idToken = await userCredential.user.getIdToken();
       const refreshToken = userCredential.user.refreshToken;
-      await save({ idToken, refreshToken });
-      queryClient.invalidateQueries("user");
-      queryClient.invalidateQueries("friends");
-      queryClient.invalidateQueries("friends_req");
-      queryClient.invalidateQueries("friends_search");
-      navigation.navigate("(tabs)");
+      save({ idToken, refreshToken }).then(() => {
+        queryClient.invalidateQueries("user");
+        queryClient.invalidateQueries("friends");
+        queryClient.invalidateQueries("friends_req");
+        queryClient.invalidateQueries("friends_search");
+        navigation.navigate("(tabs)");
+      });
     } catch (error) {
       console.log("Error signing in: ", error.message);
       setError(error.message);

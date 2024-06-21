@@ -1,19 +1,17 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FriendRow from "@/components/FriendRow";
 import { Stack } from "@/components/ui";
 import { useState } from "react";
-import DatePicker from "react-native-date-picker";
-import { TextInput } from "react-native-gesture-handler";
 
 export default function HomeScreen() {
   const { user } = useUser();
   const [show, setShow] = useState(false);
 
-  const [date, setDate] = useState(new Date());
+  console.log("USER HOME PAGE", user);
   if (!user) {
     return null;
   }
@@ -31,7 +29,6 @@ export default function HomeScreen() {
             <Text>Create a Motive</Text>
             <Text onPress={() => setShow(false)}>X</Text>
           </Stack>
-          <DatePicker mode="datetime" date={date} onDateChange={setDate} />
           <Text>Description: </Text>
           <TextInput />
           <Text>Location:</Text>
@@ -69,6 +66,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 20,
     backgroundColor: "white",
+    height: "100%",
   },
   containerBody: {
     backgroundColor: "#F4F2FF",

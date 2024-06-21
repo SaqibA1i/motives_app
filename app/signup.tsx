@@ -11,13 +11,16 @@ import {
   TextInput,
   View,
 } from "react-native";
-
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import getUser from "../components/api/getUser";
 import { useNavigation } from "expo-router";
+import { Input } from "@/components/ui/Input";
+import { launchImageLibrary } from "react-native-image-picker";
+
+import { db, storage } from "./firebaseConfig";
 
 const logo = require("@/assets/images/bg.png");
 
@@ -29,6 +32,10 @@ export default function SignUp() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const navigation = useNavigation();
+
+  const [imageUri, setImageUri] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [transferred, setTransferred] = useState(0);
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -66,6 +73,7 @@ export default function SignUp() {
       <Image source={logo} style={styles.image} resizeMode="cover" />
       <View style={styles.inputView}>
         <Text style={styles.title}>Sign Up</Text>
+
         <TextInput
           style={styles.input}
           placeholder="Full Name"
@@ -231,11 +239,11 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     color: "gray",
+    fontSize: 15,
   },
   signup: {
     cursor: "pointer",
     textDecorationLine: "underline",
     color: "#8C77DA",
-    fontSize: 13,
   },
 });

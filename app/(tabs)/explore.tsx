@@ -1,87 +1,85 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FriendRow from "@/components/FriendRow";
 import { useEffect, useState } from "react";
-import { TextInput } from "react-native-gesture-handler";
-import { User } from "@/components/types";
-import fetchFriends from "@/components/api/fetchFriends";
+import { Friend, User } from "@/components/types";
+import searchUsers from "@/components/api/searchUsers";
+import fetchFriendRequests from "@/components/api/fetchFriendRequests";
 import Card from "@/components/ui/Card";
 import { Stack } from "@/components/ui";
-import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import FriendHighlight from "@/components/FriendRow/FriendHighlight";
 import acceptReq from "@/components/api/acceptReq";
+import { useQuery } from "react-query";
+import { useQueryClient } from "react-query";
 
 export default function HomeScreen() {
   const { user } = useUser();
   const [search, setSearch] = useState("");
   const [friends, setFriends] = useState<User[]>([]);
-  const [requests, setRequests] = useState<User[]>([]);
-  const [loading, setLoading] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { data: friendsU, isLoading: loading } = useQuery(
+    ["friends_search", search],
+    searchUsers
+  );
+  const { data: requests, isLoading: loadingReq } = useQuery(
+    "friends_req",
+    fetchFriendRequests
+  );
   // send a request to the backend 1s after the user stops typing
   useEffect(() => {
-    setLoading(true);
-    const timeout = setTimeout(() => {
-      // fetch friends from the backend
-      fetchFriends(search)
-        .then((friends: any) => {
-          // setFriends(friends);
-          console.info("Friends: ", friends);
-          let temp = [];
-          for (let a in friends) {
-            temp.push(friends[a] as User);
-          }
-          setFriends(temp);
-          console.log("Friends: ", friends);
-          setLoading(false);
-        })
-        .catch((err) => {
-          console.error(err);
-          setLoading(false);
-        });
-    }, 500);
+    // fetch friends from the backend
+    // setFriends(friends);
+    let temp = [];
+    for (let a in friendsU) {
+      //@ts-ignore
+      temp.push(friendsU[a] as Friend);
+    }
+    setFriends(temp);
+  }, [friendsU]);
+  // get friend requests
 
-    return () => clearTimeout(timeout);
-  }, [search]);
-  // get freind requests
-  useEffect(() => {
-    axios
-      .get(REACT_APP_API_URL + "/api/requests", {
-        withCredentials: true,
-      })
-      .then((res) => {
-        setRequests(res.data);
-      });
-  }, []);
   const accept = (id: string) => {
     acceptReq(id).then((res) => {
       console.log(res);
-      // refresh the page in react native
-      // navigation.navigate("explore");
+      queryClient.invalidateQueries("friends");
+      queryClient.invalidateQueries("friends_req");
+      queryClient.invalidateQueries("friends_search");
     });
   };
   if (!user) {
     return null;
   }
+  console.log("REQUESTS:, ", requests);
   return (
     <SafeAreaView style={styles.container}>
       <Text>Requests:</Text>
-      {requests.length === 0 && <Text>No requests</Text>}
-      {requests.map((fri) => (
-        <Stack direction="column" gap={10} alignItems="stretch">
-          <FriendHighlight friend={fri} key={fri.id} />
-          <Text
-            onPress={() => {
-              accept(fri.id);
-            }}
-            style={styles.accept}
-          >
-            +
-          </Text>
-        </Stack>
-      ))}
+      {requests && Object.keys(requests).length === 0 && (
+        <Text>No requests</Text>
+      )}
+      <Stack direction="row" gap={10} alignItems="stretch">
+        {requests &&
+          Object.keys(requests).map((fri) => {
+            const friend = requests[fri] as User;
+            return (
+              <Stack direction="column" gap={10} alignItems="stretch">
+                <FriendHighlight friend={friend} key={friend.id} />
+                <Text
+                  onPress={() => {
+                    accept(friend.id);
+                  }}
+                  style={styles.accept}
+                >
+                  + Accept
+                </Text>
+              </Stack>
+            );
+          })}
+      </Stack>
       {/*Set up a search bar input */}
       <View style={styles.containerBody}>
         <TextInput
@@ -92,7 +90,6 @@ export default function HomeScreen() {
           autoCorrect={false}
           autoCapitalize="none"
         />
-        <hr />
         {loading && (
           <Text style={{ textAlign: "center", marginVertical: 20 }}>
             Loading...
@@ -114,6 +111,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 20,
     backgroundColor: "white",
+    height: "100%",
   },
   containerBody: {
     backgroundColor: "#F4F2FF",
@@ -128,6 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderWidth: 1,
     borderRadius: 30,
+    marginBottom: 20,
     width: "100%",
   },
   accept: {

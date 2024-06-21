@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -13,22 +13,28 @@ import {
 } from "react-native";
 
 import { signInWithEmailAndPassword } from "@firebase/auth";
+
 import { auth } from "./firebaseConfig";
 import { useNavigation } from "expo-router";
 import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import getUser from "../components/api/getUser";
-
+import { useQueryClient } from "react-query";
+import { save, getValueFor } from "../components/helpers/storage";
 const logo = require("@/assets/images/bg.png");
 
 export default function LoginForm() {
-  const [click, setClick] = useState(false);
+  const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-
+  const queryClient = useQueryClient();
   const navigation = useNavigation();
 
   const handleSignIn = async () => {
+    if (!username || !password) {
+      setError("Please fill in all fields");
+      return;
+    }
     try {
       const userCredential = await signInWithEmailAndPassword(
         auth,
@@ -37,24 +43,16 @@ export default function LoginForm() {
       );
       const idToken = await userCredential.user.getIdToken();
       const refreshToken = userCredential.user.refreshToken;
-      await axios.post(
-        REACT_APP_API_URL + "/api/signin",
-        {
-          idToken,
-          refreshToken,
-        },
-        { withCredentials: true }
-      );
-
-      getUser()
-        .then((user) => {
-          // setUser(user as User);
-          navigation.navigate("(tabs)");
-          console.info("User signed in: ", user);
-        })
-        .catch((err) => console.error(err));
+      save({ idToken, refreshToken }).then(() => {
+        queryClient.invalidateQueries("user");
+        queryClient.invalidateQueries("friends");
+        queryClient.invalidateQueries("friends_req");
+        queryClient.invalidateQueries("friends_search");
+        navigation.navigate("(tabs)");
+      });
     } catch (error) {
       console.log("Error signing in: ", error.message);
+      setError(error.message);
     }
   };
   return (
@@ -81,6 +79,7 @@ export default function LoginForm() {
           autoCapitalize="none"
         />
 
+        <Text style={styles.error}>{error}</Text>
         <View style={styles.buttonView}>
           <Pressable style={styles.button} onPress={handleSignIn}>
             <Text style={styles.buttonText}>Log in</Text>
@@ -103,6 +102,9 @@ export default function LoginForm() {
 }
 
 const styles = StyleSheet.create({
+  error: {
+    color: "red",
+  },
   header: {
     fontSize: 25,
     fontWeight: "bold",
@@ -207,11 +209,11 @@ const styles = StyleSheet.create({
   footerText: {
     textAlign: "center",
     color: "gray",
+    fontSize: 15,
   },
   signup: {
     cursor: "pointer",
     textDecorationLine: "underline",
     color: "#8C77DA",
-    fontSize: 13,
   },
 });

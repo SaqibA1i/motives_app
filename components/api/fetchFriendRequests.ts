@@ -1,19 +1,16 @@
 import axios from "axios";
 import { convertKeysToCamelCase } from "../helpers/convertKeysToCamelCase";
+// @ts-ignore
 import { REACT_APP_API_URL } from "@env";
 import { getValueFor } from "../helpers/storage";
 
-const acceptReq = async (id: string) => {
+export const fetchFriendRequests = async () => {
   const idToken = await getValueFor();
-  const res = await axios.get(REACT_APP_API_URL + "/api/acceptRequest", {
-    withCredentials: true,
+  const res = await axios.get(REACT_APP_API_URL + "/api/requests", {
     headers: {
       idToken,
-    },
-    params: {
-      friendId: id,
     },
   });
   return convertKeysToCamelCase(res.data);
 };
-export default acceptReq;
+export default fetchFriendRequests;

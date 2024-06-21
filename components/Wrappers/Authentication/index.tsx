@@ -3,33 +3,23 @@ import { UserProvider } from "../User";
 import { User } from "../User/type";
 import getUser from "../../api/getUser";
 import { useNavigation } from "expo-router";
+import { useQuery } from "react-query";
 
 interface Props {
   children: React.ReactNode;
 }
 const AuthWrapper = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
+  const { data: userData, isError, isSuccess } = useQuery("user", getUser);
   const navigation = useNavigation();
   useEffect(() => {
-    getUser()
-      .then((user) => {
-        setUser(user as User);
-        // NotificationManager.success("You are signed in!");
-      })
-      .catch((_err) => {
-        getUser()
-          .then((user) => {
-            setUser(user as User);
-            //@ts-ignore
-          })
-          .catch((_err) => {
-            navigation.navigate("login");
-            // NotificationManager.info(
-            //   "In order to make the most of our services, please sign in."
-            // );
-          });
-      });
-  }, []);
+    if (userData) {
+      console.log("USER RECEIVED", userData);
+      setUser(userData as User);
+    } else {
+      navigation.navigate("login");
+    }
+  }, [userData]);
   return <UserProvider value={{ user, setUser }}>{children}</UserProvider>;
 };
 

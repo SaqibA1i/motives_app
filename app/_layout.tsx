@@ -10,6 +10,10 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import { Wrapper } from "@/components/Wrappers";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import * as Font from 'expo-font';
+import { Handlee_400Regular } from '@expo-google-fonts/handlee';
+import { PlusJakartaSans_400Regular } from '@expo-google-fonts/plus-jakarta-sans';
+import { Heebo_400Regular } from '@expo-google-fonts/heebo';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -21,10 +25,16 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
+    Font.loadAsync({
+      Handlee_400Regular,
+      PlusJakartaSans_400Regular,
+      Heebo_400Regular
+    });
     if (loaded) {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
 
   if (!loaded) {
     return null;

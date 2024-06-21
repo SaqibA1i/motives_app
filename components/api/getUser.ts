@@ -4,7 +4,7 @@ import { getValueFor } from "../helpers/storage";
 
 const getUser = async () => {
   const tokens = await getValueFor();
-  const res = await axios.get(process.env.REACT_APP_API_URL + "/api/m_user", {
+  const res = await axios.get("https://go.mydwelling.ca" + "/api/m_user", {
     headers: {
       idToken: tokens,
     },

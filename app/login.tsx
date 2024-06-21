@@ -16,7 +16,7 @@ import { signInWithEmailAndPassword } from "@firebase/auth";
 
 import { auth } from "./firebaseConfig";
 import { useNavigation } from "expo-router";
-import { REACT_APP_API_URL } from "@env";
+
 import axios from "axios";
 import getUser from "../components/api/getUser";
 import { useQueryClient } from "react-query";
@@ -24,6 +24,7 @@ import { save, getValueFor } from "../components/helpers/storage";
 const logo = require("@/assets/images/bg.png");
 
 export default function LoginForm() {
+  const [click, setClick] = useState(false);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");

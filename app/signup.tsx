@@ -11,9 +11,6 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebaseConfig";
-import { REACT_APP_API_URL } from "@env";
 import axios from "axios";
 import getUser from "../components/api/getUser";
 import { useNavigation } from "expo-router";
@@ -52,7 +49,7 @@ export default function SignUp() {
       return;
     }
     try {
-      await axios.post(REACT_APP_API_URL + "/api/signup_m", {
+      await axios.post("https://go.mydwelling.ca" + "/api/signup_m", {
         email: email,
         password: password,
         fullName: fullName,

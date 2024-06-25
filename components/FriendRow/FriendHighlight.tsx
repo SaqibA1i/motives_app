@@ -4,7 +4,7 @@ import { View, Text, StyleSheet, Image } from "react-native";
 import { getDownloadURL, ref } from "firebase/storage";
 import { storage } from "@/app/firebaseConfig";
 
-const FriendHighlight = ({ friend }: { friend: User }) => {
+const FriendHighlight = ({ friend, size }: { friend: User; size?: number }) => {
   const [image, setImgUrl] = useState(null);
 
   if (!friend) return null;
@@ -23,50 +23,49 @@ const FriendHighlight = ({ friend }: { friend: User }) => {
       });
   }
 
-  console.log(image, img_url);
+  const styles = StyleSheet.create({
+    main: {
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    container: {
+      backgroundColor: "grey",
+      width: size ?? 50,
+      height: size ?? 50,
+      borderRadius: 500,
+      padding: 0,
+      justifyContent: "center",
+      textTransform: "uppercase",
+      alignItems: "center",
+      flexWrap: "nowrap",
+    },
+    icon: {
+      fontSize: 20,
+      fontWeight: "bold",
+      color: "white",
+    },
+    email: {
+      fontSize: 10,
+    },
+  });
   return (
     <View style={styles.main}>
-      <View style={styles.container}>
-        {image ? (
-          <Image
-            style={{ height: 50, width: 50, borderRadius: 50 }}
-            source={{ uri: image }}
-          />
-        ) : (
+      {image ? (
+        <Image
+          style={{ height: size ?? 50, width: size ?? 50, borderRadius: 500 }}
+          source={{ uri: image }}
+        />
+      ) : (
+        <View style={styles.container}>
           <Text style={styles.icon}>
             {friend.name[0]}.{friend.name[friend.name.length - 1]}
           </Text>
-        )}
-      </View>
+        </View>
+      )}
       <Text style={styles.email}>{friend.name}</Text>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  main: {
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  container: {
-    backgroundColor: "grey",
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    padding: 0,
-    justifyContent: "center",
-    textTransform: "uppercase",
-    alignItems: "center",
-    flexWrap: "nowrap",
-  },
-  icon: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  email: {
-    fontSize: 10,
-  },
-});
 export default FriendHighlight;

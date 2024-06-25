@@ -4,7 +4,6 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FriendRow from "@/components/FriendRow";
-import { Stack } from "@/components/ui";
 import { useState } from "react";
 import CreateMotive from "@/components/CreateMotive";
 import { useQuery } from "react-query";
@@ -76,7 +75,6 @@ const styles = StyleSheet.create({
     paddingVertical: 50,
     backgroundColor: "rgba(0,0,0,0.5)",
     display: "flex",
-    justifyContent: "center",
     alignItems: "center",
   },
   hidden: {

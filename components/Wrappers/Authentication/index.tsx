@@ -4,22 +4,37 @@ import { User } from "../User/type";
 import getUser from "../../api/getUser";
 import { useNavigation } from "expo-router";
 import { useQuery } from "react-query";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { auth, db } from "@/app/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 interface Props {
   children: React.ReactNode;
 }
 const AuthWrapper = ({ children }: Props) => {
   const [user, setUser] = useState<User | null>(null);
-  const { data: userData, isError, isSuccess } = useQuery("user", getUser);
   const navigation = useNavigation();
   useEffect(() => {
-    if (userData) {
-      console.log("USER RECEIVED", userData);
-      setUser(userData as User);
-    } else {
-      navigation.navigate("login");
-    }
-  }, [userData]);
+    onAuthStateChanged(auth, (user) => {
+      if (user?.uid) {
+        getDoc(doc(db, "users", user.uid))
+          .then((user) => {
+            const userData = user.data();
+            console.log("userData", userData);
+            userData &&
+              setUser({
+                id: user.id,
+                email: userData.email,
+                name: userData.name,
+              });
+            navigation.navigate("(tabs)");
+          })
+          .catch((error) => {
+            navigation.navigate("login");
+          });
+      }
+    });
+  }, []);
   return <UserProvider value={{ user, setUser }}>{children}</UserProvider>;
 };
 

@@ -1,20 +1,28 @@
 import React from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
 import FriendRow from "@/components/FriendRow";
 import { Stack } from "@/components/ui";
 import { useState } from "react";
+import CreateMotive from "@/components/CreateMotive";
+import { useQuery } from "react-query";
+import myMotives from "@/components/api/myMotives";
+import Motive from "@/components/Motive";
 
 export default function HomeScreen() {
   const { user } = useUser();
   const [show, setShow] = useState(false);
+  const { data: motives, isLoading: loading } = useQuery(
+    "myMotives",
+    myMotives
+  );
 
-  console.log("USER HOME PAGE", user);
   if (!user) {
     return null;
   }
+
   return (
     <SafeAreaView style={styles.container}>
       <FriendRow />
@@ -24,24 +32,31 @@ export default function HomeScreen() {
         </Text>
       </View>
       <View style={show ? styles.Modal : styles.hidden}>
-        <View style={styles.content}>
-          <Stack direction="row" justifyContent="space-between">
-            <Text>Create a Motive</Text>
-            <Text onPress={() => setShow(false)}>X</Text>
-          </Stack>
-          <Text>Description: </Text>
-          <TextInput />
-          <Text>Location:</Text>
-          <TextInput />
-
-          <Text>Show Motive to:</Text>
-        </View>
+        <CreateMotive onCancel={() => setShow(false)} />
       </View>
+      <ScrollView style={styles.MotiveCont}>
+        {motives &&
+          motives.map((motive) => (
+            <Motive
+              key={motive.id}
+              user={motive.user}
+              location={motive.location}
+              date={motive.time_date}
+              down={[]}
+              notDown={[]}
+              status={motive.status}
+            />
+          ))}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  MotiveCont: {
+    width: "100%",
+    padding: 20,
+  },
   content: {
     backgroundColor: "white",
     padding: 20,
@@ -50,10 +65,12 @@ const styles = StyleSheet.create({
   },
   Modal: {
     position: "absolute",
-    top: 50,
+    top: 0,
     left: 0,
     width: "100%",
-    height: "200%",
+    height: "120%",
+    minHeight: "100%",
+    paddingVertical: 50,
     backgroundColor: "rgba(0,0,0,0.5)",
     display: "flex",
     justifyContent: "center",

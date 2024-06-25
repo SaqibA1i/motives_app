@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 20,
     padding: 15,
+    marginVertical: 10,
   },
   col: {
     gap: 10,

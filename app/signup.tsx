@@ -16,8 +16,9 @@ import getUser from "../components/api/getUser";
 import { useNavigation } from "expo-router";
 import { Input } from "@/components/ui/Input";
 import { launchImageLibrary } from "react-native-image-picker";
-
-import { db, storage } from "./firebaseConfig";
+import { admin, auth, db, usersCollection } from "./firebaseConfig";
+import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 
 const logo = require("@/assets/images/bg.png");
 
@@ -48,13 +49,25 @@ export default function SignUp() {
       setError("Passwords do not match");
       return;
     }
-    try {
-      await axios.post("https://go.mydwelling.ca" + "/api/signup_m", {
-        email: email,
-        password: password,
-        fullName: fullName,
-      });
+    if (!fullName || !email || !password) {
+      throw "Please fill in all fields";
+    }
 
+    try {
+      const userRecord = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      if (!userRecord.user.uid) {
+        throw "user not created in firestore";
+      }
+      // create user in firestore
+      console.log("SETTING");
+      setDoc(doc(db, "users", userRecord.user.uid), {
+        email,
+        name: fullName,
+      });
       // route to login after 1s
       setTimeout(() => {
         navigation.navigate("login");

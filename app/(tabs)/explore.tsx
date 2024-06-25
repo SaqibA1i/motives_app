@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 
 import { useUser } from "@/components/Wrappers/User";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -56,7 +56,7 @@ export default function HomeScreen() {
   }
   console.log("REQUESTS:, ", requests);
   return (
-    <SafeAreaView style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text>Requests:</Text>
       {requests && Object.keys(requests).length === 0 && (
         <Text>No requests</Text>
@@ -102,13 +102,12 @@ export default function HomeScreen() {
           ))}
         </Stack>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
     paddingTop: 20,
     backgroundColor: "white",
     height: "100%",

@@ -44,7 +44,7 @@ export default function LoginForm() {
       );
       const idToken = await userCredential.user.getIdToken();
       const refreshToken = userCredential.user.refreshToken;
-      save({ idToken, refreshToken }).then(() => {
+      save({ refreshToken, idToken }).then(() => {
         queryClient.invalidateQueries("user");
         queryClient.invalidateQueries("friends");
         queryClient.invalidateQueries("friends_req");

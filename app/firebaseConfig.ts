@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
 import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
 const firebaseConfig = {
   apiKey: "AIzaSyBtIZiVsXzamynwJukckHVpzfocTd0wrgU", // TODO REMOVE
   authDomain: "my-dwelling-codele.firebaseapp.com",
@@ -19,5 +21,5 @@ const auth = initializeAuth(firebaseApp, {
 });
 
 const db = getFirestore(firebaseApp);
-
-export { db, auth, firebaseConfig };
+const storage = getStorage();
+export { storage, db, auth, firebaseConfig };

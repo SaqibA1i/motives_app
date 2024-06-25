@@ -10,15 +10,16 @@ import {
   Text,
   TextInput,
   View,
+  TouchableOpacity,
 } from "react-native";
-import axios from "axios";
-import getUser from "../components/api/getUser";
 import { useNavigation } from "expo-router";
-import { Input } from "@/components/ui/Input";
-import { launchImageLibrary } from "react-native-image-picker";
-import { admin, auth, db, usersCollection } from "./firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import * as ImagePicker from "expo-image-picker";
+import { auth, db, storage } from "./firebaseConfig";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { addDoc, collection, onSnapshot } from "firebase/firestore";
+import { Stack } from "@/components/ui";
 
 const logo = require("@/assets/images/bg.png");
 
@@ -31,9 +32,48 @@ export default function SignUp() {
   const [error, setError] = useState("");
   const navigation = useNavigation();
 
-  const [imageUri, setImageUri] = useState(null);
+  const [image, setImage] = useState(null);
   const [uploading, setUploading] = useState(false);
-  const [transferred, setTransferred] = useState(0);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+    const source = { uri: result.assets[0].uri };
+    console.log(source);
+    setImage(source);
+  };
+
+  const uploadImage = async () => {
+    if (image === null) {
+      Alert.alert("Please select an image first!");
+      return;
+    }
+    setUploading(true);
+    const response = await fetch(image.uri);
+    const blob = await response.blob();
+    const filename = image.uri.substring(image.uri.lastIndexOf("/") + 1);
+    var storageRef = ref(storage, filename);
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+    uploadTask.on("state_changed", (snapshot) => {
+      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      console.log("Upload is " + progress + "% done");
+      switch (snapshot.state) {
+        case "paused":
+          console.log("Upload is paused");
+          break;
+        case "running":
+          console.log("Upload is running");
+          break;
+      }
+    });
+    setUploading(false);
+    Alert.alert("Photo uploaded!");
+    setImage(null);
+  };
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
@@ -52,8 +92,11 @@ export default function SignUp() {
     if (!fullName || !email || !password) {
       throw "Please fill in all fields";
     }
-
+    setUploading(true);
     try {
+      if (image !== null) {
+        await uploadImage();
+      }
       const userRecord = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -63,27 +106,47 @@ export default function SignUp() {
         throw "user not created in firestore";
       }
       // create user in firestore
-      console.log("SETTING");
-      setDoc(doc(db, "users", userRecord.user.uid), {
+      await setDoc(doc(db, "users", userRecord.user.uid), {
         email,
         name: fullName,
+        img_url: image
+          ? image.uri.substring(image.uri.lastIndexOf("/") + 1)
+          : null,
       });
+
       // route to login after 1s
-      setTimeout(() => {
+      await setTimeout(() => {
         navigation.navigate("login");
       }, 1000);
+      setUploading(false);
     } catch (error) {
       console.log("Error signing up: ", JSON.stringify(error));
       setError(error.response?.data?.error || "Internal Server Error");
+      setUploading(false);
     }
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.header}>Motives App!</Text>
       <Image source={logo} style={styles.image} resizeMode="cover" />
       <View style={styles.inputView}>
         <Text style={styles.title}>Sign Up</Text>
-
+        <Stack
+          alignItems="center"
+          direction="column"
+          style={styles.ImagePreview}
+        >
+          {image && (
+            <Image
+              source={{ uri: image.uri }}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+          )}
+          <TouchableOpacity onPress={pickImage}>
+            <Text style={{ color: "blue" }}>Select Profile Picture</Text>
+          </TouchableOpacity>
+        </Stack>
         <TextInput
           style={styles.input}
           placeholder="Full Name"
@@ -120,9 +183,12 @@ export default function SignUp() {
         />
         <Text style={styles.error}>{error}</Text>
         <View style={styles.buttonView}>
-          <Pressable style={styles.button} onPress={handleSignUp}>
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </Pressable>
+          {uploading && <Text>Uploading...</Text>}
+          {!uploading && (
+            <Pressable style={styles.button} onPress={handleSignUp}>
+              <Text style={styles.buttonText}>Sign Up</Text>
+            </Pressable>
+          )}
         </View>
 
         <Text style={styles.footerText}>
@@ -141,6 +207,7 @@ export default function SignUp() {
 }
 
 const styles = StyleSheet.create({
+  ImagePreview: {},
   error: {
     color: "red",
   },

@@ -30,6 +30,7 @@ function FriendRow() {
 
 const styles = StyleSheet.create({
   container: {
+    height: 100,
     maxHeight: 100,
     width: "100%",
     paddingHorizontal: 20,

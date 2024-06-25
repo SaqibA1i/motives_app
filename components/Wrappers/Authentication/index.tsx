@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { UserProvider } from "../User";
-import { User } from "../User/type";
 import getUser from "../../api/getUser";
 import { useNavigation } from "expo-router";
 import { useQuery } from "react-query";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/app/firebaseConfig";
 import { doc, getDoc } from "firebase/firestore";
+import { User } from "@/components/types";
 
 interface Props {
   children: React.ReactNode;
@@ -26,6 +26,7 @@ const AuthWrapper = ({ children }: Props) => {
                 id: user.id,
                 email: userData.email,
                 name: userData.name,
+                img_url: userData.img_url ?? null,
               });
             navigation.navigate("(tabs)");
           })

@@ -5,6 +5,7 @@ import MotiveStatus from "./MotiveStatus";
 import Entypo from "@expo/vector-icons/Entypo";
 import { User } from "./types";
 import { Timestamp } from "firebase/firestore";
+import FriendHighlight from "./FriendRow/FriendHighlight";
 
 type Props = {
   user: User;
@@ -26,7 +27,7 @@ const Motive = ({ user, location, date, down, notDown, status }: Props) => {
     <View style={styles.container}>
       <View>
         <View style={styles.header}>
-          <Avatar.Text size={54} label="MA" />
+          <FriendHighlight friend={user} />
           <View>
             <View style={styles.headerName}>
               <Text style={styles.nameText}>{name}</Text>

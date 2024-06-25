@@ -38,7 +38,7 @@ export default function HomeScreen() {
         {motives &&
           motives.map((motive) => (
             <Motive
-              key={motive.id}
+              key={motive.time_date}
               user={motive.user}
               location={motive.location}
               date={motive.time_date}
@@ -55,7 +55,9 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   MotiveCont: {
     width: "100%",
+    zIndex: 1,
     padding: 20,
+    backgroundColor: "#F4F2FF",
   },
   content: {
     backgroundColor: "white",
@@ -65,6 +67,7 @@ const styles = StyleSheet.create({
   },
   Modal: {
     position: "absolute",
+    zIndex: 100,
     top: 0,
     left: 0,
     width: "100%",
